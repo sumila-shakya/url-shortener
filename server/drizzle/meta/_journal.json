@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1768321601935,
+      "tag": "0000_rapid_adam_destine",
+      "breakpoints": true
+    }
+  ]
+}
