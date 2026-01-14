@@ -1,0 +1,35 @@
+import mongoose, {Document} from "mongoose";
+
+export interface IAnalytics extends Document {
+    short_code: string,
+    timestamp: Date,
+    ip_address?: string,
+    user_agent?: string 
+}
+
+const analyticsSchema = new mongoose.Schema({
+    short_code: {
+        type: String,
+        required: true,
+        unique: true,
+        index: true
+    },
+    timestamp: {
+        type: Date,
+        required: true,
+        default: Date.now,
+        index: true
+    },
+    ip_address: {
+        type: String,
+        required: false
+    },
+    user_agent: {
+        type: String,
+        required: false
+    }
+})
+
+analyticsSchema.index({short_code: 1, timestamp: -1})
+
+export const Analytics = mongoose.model<IAnalytics>('Analytics', analyticsSchema)

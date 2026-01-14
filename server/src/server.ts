@@ -2,6 +2,8 @@ import 'dotenv/config'
 import express from "express";
 import { db } from "./config/mysql";
 import { connectMongoDb } from "./config/mongodb";
+import { Analytics } from './db/mongodbSchema';
+import { urls } from './db/mysqlSchema';
 import mongoose from "mongoose";
 
 const app = express()
@@ -35,8 +37,14 @@ const startServer = async ()=> {
 //database connection check
 app.get('/api/health', async (req, res)=> {
     try {
+        //test database conection
         const mongodbStatus = mongoose.connection.readyState === 1 ? "connected" : "disconnected";
         await db.execute('SELECT 1')
+
+        //test database schema
+        await db.select().from(urls).limit(1)
+        await Analytics.countDocuments()
+        
         res.status(200).json({
             status:"ok",
             message: "server is running",
