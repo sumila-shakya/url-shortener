@@ -1,6 +1,13 @@
 const BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-export const generateShortCode = (num: number):string => {
+export const generateShortCode = (): string => {
+    const min = 62**6
+    const max = (62**7-1)
+    const randomNum = Math.floor(Math.random() * (max - min + 1)) + min
+    return convertToBase62(randomNum)
+}
+
+const convertToBase62 = (num: number):string => {
     if( num === 0) {
         return BASE62[0]
     }

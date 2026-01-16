@@ -5,10 +5,14 @@ import { connectMongoDb } from "./config/mongodb";
 import { Analytics } from './db/mongodbSchema';
 import { urls } from './db/mysqlSchema';
 import mongoose from "mongoose";
+import router from './routes/urlRoutes';
 
 const app = express()
 const PORT = process.env.PORT || 3000
 
+app.use(express.json())
+
+app.use('/api',router)
 
 const startServer = async ()=> {
     try {
