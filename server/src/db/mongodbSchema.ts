@@ -11,7 +11,6 @@ const analyticsSchema = new mongoose.Schema({
     short_code: {
         type: String,
         required: true,
-        unique: true,
         index: true
     },
     timestamp: {

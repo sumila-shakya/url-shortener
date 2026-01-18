@@ -3,6 +3,9 @@ import { urlControllers } from "../controllers/urlController";
 
 const router = Router()
 
-router.post('/urls',urlControllers.createUrl)
+router.post('/api/urls',urlControllers.createUrl)
+
+//redirect route
+router.get('/:shortCode',urlControllers.redirectUrl)
 
 export default router

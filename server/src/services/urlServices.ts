@@ -38,4 +38,18 @@ export const urlServices = {
         return newUrl
     }
     ,
+
+    async getLongUrl(shortCode: string): Promise<Url> {
+        //get the long url
+        const [linkData] = await db.select()
+        .from(urls)
+        .where(eq(urls.shortCode,shortCode))
+        .limit(1)
+
+        if(!linkData) {
+            throw new Error("Url not Found")
+        }
+
+        return linkData
+    }
 }
