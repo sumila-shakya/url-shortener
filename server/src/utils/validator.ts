@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+//long url request body schema
 export const reqSchema = z.object({
     longUrl: z.string().url({message: "Invalid URL format"})
     .regex(/^https?:\/\//, {message: "Only http/https allowed"})
@@ -8,6 +9,7 @@ export const reqSchema = z.object({
 
 export type reqType = z.infer<typeof reqSchema>
 
+//short code schema
 export const shortCodeSchema = z.string()
 .min(6, {message:"Code too short"})
 .max(10, {message: "Code too long"})

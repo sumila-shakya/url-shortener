@@ -4,6 +4,7 @@ import { ZodError } from "zod";
 import { urlServices } from "../services/urlServices";
 import { analyticsEmitter } from "../events/analyticsEvents";
 import { hashData } from "../utils/hashIp";
+import { parseBrowser } from "../utils/userAgentParser";
 
 export const urlControllers = {
     async createUrl(req: Request, res: Response) {
@@ -26,7 +27,7 @@ export const urlControllers = {
                     shortUrl: shortUrl,
                     longUrl: url.longUrl,
                     createdAt: url.createdAt,
-                    clicks: url.clicks
+                    clicks: url.clicks,
                 }
             })
         } catch(error) {
@@ -47,22 +48,26 @@ export const urlControllers = {
             console.log("Error: ",error)
             res.status(500).json({
                 success: false,
-                error: "Internal server error"
+                error: error instanceof Error? error.message: "Internal server error"
             })
         }
     },
 
     async redirectUrl(req: Request, res: Response) {
         try {
+            //validate user input
             const shortCode = shortCodeSchema.parse(req.params.shortCode)
 
+            //get long url
             const linkData = await urlServices.getLongUrl(shortCode)
             
+            //asynchronous logging
             analyticsEmitter.emit('url_clicked', {
                 short_code: shortCode,
                 timestamp: new Date(),
                 ip_address: hashData(req.ip || 'unknown'),
-                user_agent: req.headers['user-agent']
+                user_agent: req.headers['user-agent'],
+                browser: parseBrowser(req.headers['user-agent'])
             })
 
             //default 302 http status code
@@ -86,8 +91,37 @@ export const urlControllers = {
             console.log("Error: ",error)
             res.status(500).json({
                 success: false,
-                error: "Internal server error"
+                error: error instanceof Error? error.message: "Internal server error"
             })
         }
     },
+
+    async getAnalytics(req: Request, res: Response) {
+        try {
+            //validate input data
+            const shortCode = shortCodeSchema.parse(req.params.shortCode)
+
+            //get analytics report
+            const report = await urlServices.getAnalytics(shortCode)
+
+            return res.status(200).json({
+                success: true,
+                report: report
+            })
+        } catch(error) {
+            if(error instanceof ZodError) {
+                console.log(error.issues)
+                return res.status(400).json({
+                    success: false,
+                    error: "Validation failed",
+                    detail: error.issues
+                })
+            }
+            console.log("Error: ",error)
+            res.status(500).json({
+                success: false,
+                error: error instanceof Error? error.message: "Internal server error"
+            })
+        }
+    }
 }

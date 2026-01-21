@@ -4,7 +4,8 @@ export interface IAnalytics extends Document {
     short_code: string,
     timestamp: Date,
     ip_address?: string,
-    user_agent?: string 
+    user_agent?: string,
+    browser: string 
 }
 
 const analyticsSchema = new mongoose.Schema({
@@ -26,6 +27,11 @@ const analyticsSchema = new mongoose.Schema({
     user_agent: {
         type: String,
         required: false
+    },
+    browser: {
+        type: String,
+        required: true,
+        index: true
     }
 })
 

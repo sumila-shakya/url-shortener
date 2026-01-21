@@ -10,8 +10,10 @@ import router from './routes/urlRoutes';
 const app = express()
 const PORT = process.env.PORT || 3000
 
+//handle json data
 app.use(express.json())
 
+//url route
 app.use('',router)
 
 const startServer = async ()=> {
@@ -63,4 +65,5 @@ app.get('/api/health', async (req, res)=> {
     }
 })
 
+//start server
 startServer()

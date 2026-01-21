@@ -4,7 +4,8 @@ export interface analyticsEvent {
     short_code: string,
     timestamp: Date,
     ip_address?: string,
-    user_agent?: string 
+    user_agent?: string,
+    browser: string 
 }
 
 export const logAnalytics = async(log_info:analyticsEvent)=> {
