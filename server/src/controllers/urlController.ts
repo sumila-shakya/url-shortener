@@ -13,7 +13,7 @@ export const urlControllers = {
             const validatedData = reqSchema.parse(req.body)
 
             //create short code
-            const url = await urlServices.createShortUrl(validatedData.longUrl)
+            const url = await urlServices.createShortUrl(validatedData.longUrl, validatedData.slug)
 
             //build url
             const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`
@@ -39,11 +39,19 @@ export const urlControllers = {
                     detail: error.issues
                 })
             }
-            if(error instanceof Error && error.message.includes('Please try again')) {
-                return res.status(503).json({
-                    success: false,
-                    error: error.message
-                })
+            if(error instanceof Error) {
+                if(error.message.includes('Please try again')) {
+                    return res.status(503).json({
+                        success: false,
+                        error: error.message
+                    })
+                }
+                if(error.message.includes('Slug already taken')) {
+                    return res.status(409).json({
+                        success: false,
+                        error: error.message
+                    })
+                }
             }
             console.log("Error: ",error)
             res.status(500).json({

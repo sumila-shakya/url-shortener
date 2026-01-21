@@ -6,25 +6,37 @@ import { generateShortCode } from "../utils/shortCode";
 
 
 export const urlServices = {
-    async createShortUrl(longUrl: string): Promise<Url> {
+    async createShortUrl(longUrl: string, slug?:string): Promise<Url> {
         const MAX_RETRY = 3
-        let shortCode = ''
-        for(let attempt = 0; attempt < MAX_RETRY; attempt++) {
-            //generate short code
-            shortCode = generateShortCode()
+        let shortCode = slug || ''
+        if(!slug) {
+            for(let attempt = 0; attempt < MAX_RETRY; attempt++) {
+                //generate short code
+                shortCode = generateShortCode()
 
-            //database lookup fro existing short_code
-            const existing = await db.select()
-            .from(urls)
-            .where(eq(urls.shortCode, shortCode))
-            .limit(1)
+                //database lookup fro existing short_code
+                const existing = await db.select()
+                .from(urls)
+                .where(eq(urls.shortCode, shortCode))
+                .limit(1)
 
-            if(existing.length === 0) {
-                break;
+                if(existing.length === 0) {
+                    break;
+                }
+
+                if(attempt === MAX_RETRY-1) {
+                    throw new Error("Failed to generate unique short code. Please try again")
+                }
             }
-
-            if(attempt === MAX_RETRY-1) {
-                throw new Error("Failed to generate unique short code. Please try again")
+        }
+        else {
+            const existing = await db.select()
+                .from(urls)
+                .where(eq(urls.shortCode, slug))
+                .limit(1)
+            
+            if(existing.length > 0) {
+                throw new Error("Slug already taken")
             }
         }
         //insert short code, long url mapping to database
@@ -37,7 +49,7 @@ export const urlServices = {
         const [newUrl] = await db.select()
         .from(urls)
         .where(eq(urls.id,result.insertId))
-
+        
         return newUrl
     }
     ,
