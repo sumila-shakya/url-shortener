@@ -125,6 +125,12 @@ export const urlControllers = {
                     detail: error.issues
                 })
             }
+            if(error instanceof Error && error.message.includes('Url not Found')) {
+                return res.status(404).json({
+                    success: false,
+                    error: error.message
+                })
+            }
             console.log("Error: ",error)
             res.status(500).json({
                 success: false,
