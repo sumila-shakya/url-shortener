@@ -1,4 +1,4 @@
-import { mysqlTable, serial, varchar, int, timestamp, index } from "drizzle-orm/mysql-core";
+import { mysqlTable, serial, varchar, int, timestamp} from "drizzle-orm/mysql-core";
 
 export const urls = mysqlTable("urls", {
     id: serial('id').primaryKey(),
@@ -9,4 +9,3 @@ export const urls = mysqlTable("urls", {
 })
 
 export type Url = typeof urls.$inferSelect
-export type NewUrl = typeof urls.$inferInsert

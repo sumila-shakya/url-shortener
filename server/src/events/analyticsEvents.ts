@@ -9,8 +9,8 @@ export const analyticsEmitter = new EventEmitter()
 //define the event listener
 analyticsEmitter.on('url_clicked', async (log_info: analyticsEvent)=> {
     try {
-         //update clicks
-         await db.update(urls)
+        //update clicks
+        await db.update(urls)
         .set({clicks: sql`${urls.clicks} + 1`})
         .where(eq(urls.shortCode,log_info.short_code))
         .execute()

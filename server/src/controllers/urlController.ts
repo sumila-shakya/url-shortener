@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { reqSchema, shortCodeSchema } from "../utils/validator";
+import { reqSchema, shortCodeSchema, reqType, shortCodeType } from "../utils/validator";
 import { ZodError } from "zod";
 import { urlServices } from "../services/urlServices";
 import { analyticsEmitter } from "../events/analyticsEvents";
@@ -10,10 +10,10 @@ export const urlControllers = {
     async createUrl(req: Request, res: Response) {
         try{
             //validate data
-            const validatedData = reqSchema.parse(req.body)
+            const validatedData: reqType = reqSchema.parse(req.body)
 
             //create short code
-            const url = await urlServices.createShortUrl(validatedData.longUrl, validatedData.slug)
+            const url = await urlServices.createShortUrl(validatedData)
 
             //build url
             const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`
@@ -31,6 +31,7 @@ export const urlControllers = {
                 }
             })
         } catch(error) {
+            //Zod validation error
             if(error instanceof ZodError) {
                 console.log(error.issues)
                 return res.status(400).json({
@@ -40,12 +41,14 @@ export const urlControllers = {
                 })
             }
             if(error instanceof Error) {
+                //ShortCode collision error
                 if(error.message.includes('Please try again')) {
                     return res.status(503).json({
                         success: false,
                         error: error.message
                     })
                 }
+                //custom slug collision error
                 if(error.message.includes('Slug already taken')) {
                     return res.status(409).json({
                         success: false,
@@ -64,7 +67,7 @@ export const urlControllers = {
     async redirectUrl(req: Request, res: Response) {
         try {
             //validate user input
-            const shortCode = shortCodeSchema.parse(req.params.shortCode)
+            const shortCode: shortCodeType = shortCodeSchema.parse(req.params.shortCode)
 
             //get long url
             const linkData = await urlServices.getLongUrl(shortCode)
@@ -82,6 +85,7 @@ export const urlControllers = {
             return res.redirect(linkData.longUrl)
 
         }catch(error) {
+            //Zod validation error
             if(error instanceof ZodError) {
                 console.log(error.issues)
                 return res.status(400).json({
@@ -107,7 +111,7 @@ export const urlControllers = {
     async getAnalytics(req: Request, res: Response) {
         try {
             //validate input data
-            const shortCode = shortCodeSchema.parse(req.params.shortCode)
+            const shortCode: shortCodeType = shortCodeSchema.parse(req.params.shortCode)
 
             //get analytics report
             const report = await urlServices.getAnalytics(shortCode)
@@ -117,6 +121,7 @@ export const urlControllers = {
                 report: report
             })
         } catch(error) {
+            //Zod validation error
             if(error instanceof ZodError) {
                 console.log(error.issues)
                 return res.status(400).json({

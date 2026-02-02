@@ -14,8 +14,6 @@ export const reqSchema = z.object({
     .optional()
 })
 
-export type reqType = z.infer<typeof reqSchema>
-
 //short code schema
 export const shortCodeSchema = z.string()
 .min(6, {message:"Code too short"})
@@ -23,3 +21,4 @@ export const shortCodeSchema = z.string()
 .regex(/^[a-zA-Z0-9_-]+$/, {message: "Invalid Code format"})
 
 export type shortCodeType = z.infer<typeof shortCodeSchema>
+export type reqType = z.infer<typeof reqSchema>

@@ -1,12 +1,14 @@
 import { db } from "../config/mysql";
-import { urls, Url, NewUrl } from "../db/mysqlSchema";
+import { urls, Url } from "../db/mysqlSchema";
 import { Analytics } from "../db/mongodbSchema";
 import { eq } from "drizzle-orm";
 import { generateShortCode } from "../utils/shortCode";
+import { shortCodeType, reqType } from "../utils/validator";
 
 
 export const urlServices = {
-    async createShortUrl(longUrl: string, slug?:string): Promise<Url> {
+    async createShortUrl(reqData: reqType): Promise<Url> {
+        const { longUrl, slug } = reqData
         const MAX_RETRY = 3
         let shortCode = slug || ''
         if(!slug) {
@@ -14,7 +16,7 @@ export const urlServices = {
                 //generate short code
                 shortCode = generateShortCode()
 
-                //database lookup fro existing short_code
+                //database lookup for existing short_code
                 const existing = await db.select()
                 .from(urls)
                 .where(eq(urls.shortCode, shortCode))
@@ -54,7 +56,7 @@ export const urlServices = {
     }
     ,
 
-    async getLongUrl(shortCode: string): Promise<Url> {
+    async getLongUrl(shortCode: shortCodeType): Promise<Url> {
         //get the long url
         const [linkData] = await db.select()
         .from(urls)
@@ -69,7 +71,7 @@ export const urlServices = {
     }
     ,
 
-    async getAnalytics(shortCode: string) {
+    async getAnalytics(shortCode: shortCodeType) {
         //get link data
         const linkData = await this.getLongUrl(shortCode)
 

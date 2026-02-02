@@ -12,13 +12,11 @@ const analyticsSchema = new mongoose.Schema({
     short_code: {
         type: String,
         required: true,
-        index: true
     },
     timestamp: {
         type: Date,
         required: true,
         default: Date.now,
-        index: true
     },
     ip_address: {
         type: String,

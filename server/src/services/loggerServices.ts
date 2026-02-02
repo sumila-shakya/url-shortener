@@ -8,7 +8,8 @@ export interface analyticsEvent {
     browser: string 
 }
 
-export const logAnalytics = async(log_info:analyticsEvent)=> {
+//log into the MongoDb database
+export const logAnalytics = async(log_info:analyticsEvent): Promise<void>=> {
     try{
         await Analytics.create(log_info)
     } catch(error) {
