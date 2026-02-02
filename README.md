@@ -383,7 +383,6 @@ app.use('/api', routes);
 - Course: BSc CSIT (5th Semester)
 - Institution: Amrit Science College
 - GitHub: [@sumila-shakya](https://github.com/sumila-shakya)
-- Email: sumilashakya14@gmail.com
 
 ## 📝 License
 
