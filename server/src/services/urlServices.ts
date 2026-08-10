@@ -4,10 +4,11 @@ import { Analytics } from "../db/mongodbSchema";
 import { eq } from "drizzle-orm";
 import { generateShortCode } from "../utils/shortCode";
 import { shortCodeType, reqType } from "../utils/validator";
+import { ApiError } from "../utils/apiError";
 
 
 export const urlServices = {
-    async createShortUrl(reqData: reqType): Promise<Url> {
+    async createShortUrl(reqData: reqType) {
         const { longUrl, slug } = reqData
         const MAX_RETRY = 3
         let shortCode = slug || ''
@@ -27,7 +28,7 @@ export const urlServices = {
                 }
 
                 if(attempt === MAX_RETRY-1) {
-                    throw new Error("Failed to generate unique short code. Please try again")
+                    throw new ApiError(503, "Failed to generate unique short code. Please try again")
                 }
             }
         }
@@ -38,7 +39,7 @@ export const urlServices = {
                 .limit(1)
             
             if(existing.length > 0) {
-                throw new Error("Slug already taken")
+                throw new ApiError(409, "Slug already taken")
             }
         }
         //insert short code, long url mapping to database
@@ -51,8 +52,20 @@ export const urlServices = {
         const [newUrl] = await db.select()
         .from(urls)
         .where(eq(urls.id,result.insertId))
+
+        //build url
+        const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`
+        const shortUrl = `${baseUrl}/${newUrl.shortCode}`
         
-        return newUrl
+        const data = {
+            id: newUrl.id,
+            shortUrl: shortUrl,
+            longUrl: newUrl.longUrl,
+            createdAt: newUrl.createdAt,
+            clicks: newUrl.clicks,
+        }
+        
+        return data
     }
     ,
 
@@ -64,7 +77,7 @@ export const urlServices = {
         .limit(1)
 
         if(!linkData) {
-            throw new Error("Url not Found")
+            throw new ApiError(404, "Url not Found")
         }
 
         return linkData

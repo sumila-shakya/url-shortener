@@ -20,5 +20,11 @@ export const shortCodeSchema = z.string()
 .max(10, {message: "Code too long"})
 .regex(/^[a-zA-Z0-9_-]+$/, {message: "Invalid Code format"})
 
+export const rateLimitDataSchema = z.object({
+    firstAt: z.coerce.number(),
+    count: z.coerce.number().positive()
+})
+
 export type shortCodeType = z.infer<typeof shortCodeSchema>
 export type reqType = z.infer<typeof reqSchema>
+export type rateLimitDataType = z.infer<typeof rateLimitDataSchema>

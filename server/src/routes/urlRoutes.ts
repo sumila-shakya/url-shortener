@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { urlControllers } from "../controllers/urlController";
+import { rateLimiter } from "../middleware/rateLimiter";
 
 const router = Router()
 
 //url shortening route
-router.post('/api/urls',urlControllers.createUrl)
+router.post('/api/urls', rateLimiter.limitCreation, urlControllers.createUrl)
 
 //redirect route
 router.get('/:shortCode',urlControllers.redirectUrl)

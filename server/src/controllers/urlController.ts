@@ -1,5 +1,7 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { reqSchema, shortCodeSchema, reqType, shortCodeType } from "../utils/validator";
+import { ApiError } from "../utils/apiError";
+import { ApiResponse } from "../utils/apiResponse";
 import { ZodError } from "zod";
 import { urlServices } from "../services/urlServices";
 import { analyticsEmitter } from "../events/analyticsEvents";
@@ -7,64 +9,23 @@ import { hashData } from "../utils/hashIp";
 import { parseBrowser } from "../utils/userAgentParser";
 
 export const urlControllers = {
-    async createUrl(req: Request, res: Response) {
+    async createUrl(req: Request, res: Response, next: NextFunction) {
         try{
             //validate data
             const validatedData: reqType = reqSchema.parse(req.body)
 
             //create short code
-            const url = await urlServices.createShortUrl(validatedData)
-
-            //build url
-            const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`
-            const shortUrl = `${baseUrl}/${url.shortCode}`
+            const data = await urlServices.createShortUrl(validatedData)
 
             //response 201 created
-            return res.status(201).json({
-                success: true,
-                data: {
-                    id: url.id,
-                    shortUrl: shortUrl,
-                    longUrl: url.longUrl,
-                    createdAt: url.createdAt,
-                    clicks: url.clicks,
-                }
-            })
+            return res.status(201)
+            .json(new ApiResponse(201, data, "Url shortened successfully"))
         } catch(error) {
-            //Zod validation error
-            if(error instanceof ZodError) {
-                console.log(error.issues)
-                return res.status(400).json({
-                    success: false,
-                    error: "Input validation failed",
-                    detail: error.issues
-                })
-            }
-            if(error instanceof Error) {
-                //ShortCode collision error
-                if(error.message.includes('Please try again')) {
-                    return res.status(503).json({
-                        success: false,
-                        error: error.message
-                    })
-                }
-                //custom slug collision error
-                if(error.message.includes('Slug already taken')) {
-                    return res.status(409).json({
-                        success: false,
-                        error: error.message
-                    })
-                }
-            }
-            console.log("Error: ",error)
-            res.status(500).json({
-                success: false,
-                error: error instanceof Error? error.message: "Internal server error"
-            })
+            next(error)
         }
     },
 
-    async redirectUrl(req: Request, res: Response) {
+    async redirectUrl(req: Request, res: Response, next: NextFunction) {
         try {
             //validate user input
             const shortCode: shortCodeType = shortCodeSchema.parse(req.params.shortCode)
@@ -85,30 +46,11 @@ export const urlControllers = {
             return res.redirect(linkData.longUrl)
 
         }catch(error) {
-            //Zod validation error
-            if(error instanceof ZodError) {
-                console.log(error.issues)
-                return res.status(400).json({
-                    success: false,
-                    error: "Validation failed",
-                    detail: error.issues
-                })
-            }
-            if(error instanceof Error && error.message.includes('Url not Found')) {
-                return res.status(404).json({
-                    success: false,
-                    error: error.message
-                })
-            }
-            console.log("Error: ",error)
-            res.status(500).json({
-                success: false,
-                error: error instanceof Error? error.message: "Internal server error"
-            })
+            next(error)
         }
     },
 
-    async getAnalytics(req: Request, res: Response) {
+    async getAnalytics(req: Request, res: Response, next: NextFunction) {
         try {
             //validate input data
             const shortCode: shortCodeType = shortCodeSchema.parse(req.params.shortCode)
@@ -116,31 +58,11 @@ export const urlControllers = {
             //get analytics report
             const report = await urlServices.getAnalytics(shortCode)
 
-            return res.status(200).json({
-                success: true,
-                report: report
-            })
+            return res
+            .status(200)
+            .json(new ApiResponse(200, report))
         } catch(error) {
-            //Zod validation error
-            if(error instanceof ZodError) {
-                console.log(error.issues)
-                return res.status(400).json({
-                    success: false,
-                    error: "Validation failed",
-                    detail: error.issues
-                })
-            }
-            if(error instanceof Error && error.message.includes('Url not Found')) {
-                return res.status(404).json({
-                    success: false,
-                    error: error.message
-                })
-            }
-            console.log("Error: ",error)
-            res.status(500).json({
-                success: false,
-                error: error instanceof Error? error.message: "Internal server error"
-            })
+            next(error)
         }
     }
 }
