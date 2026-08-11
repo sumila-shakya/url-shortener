@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { generateShortCode } from "../utils/shortCode";
 import { shortCodeType, reqType } from "../utils/validator";
 import { ApiError } from "../utils/apiError";
+import { RedisClient } from "../config/redis.config";
 
 
 export const urlServices = {
@@ -79,6 +80,8 @@ export const urlServices = {
         if(!linkData) {
             throw new ApiError(404, "Url not Found")
         }
+
+        await RedisClient.set(shortCode, linkData.longUrl, 'EX', 2*60)
 
         return linkData
     }

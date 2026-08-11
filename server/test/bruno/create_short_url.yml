@@ -1,0 +1,22 @@
+info:
+  name: create_short_url
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: http://localhost:3000/api/urls
+  body:
+    type: json
+    data: |-
+      {
+        "longUrl": "https://medium.com/@erickzanetti/redis-and-node-js-with-typescript-a-complete-guide-2bac6e300497",
+        "slug": "myurl"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

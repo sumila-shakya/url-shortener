@@ -1,0 +1,7 @@
+### shorten url
+POST http://localhost:3000/api/urls
+Content-Type: application/json
+
+{
+  "longUrl": "https://medium.com/@erickzanetti/redis-and-node-js-with-typescript-a-complete-guide-2bac6e300497"
+}

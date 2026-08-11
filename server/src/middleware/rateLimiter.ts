@@ -1,48 +1,26 @@
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/apiError";
 import { RedisClient } from "../config/redis.config";
-import { rateLimitDataSchema, rateLimitDataType } from "../utils/validator";
+import { MAX_LIMIT, WINDOWN_SIZE } from "../utils/constants";
 
-export const rateLimiter = {
-    async limitCreation(req: Request, res: Response, next: NextFunction) {
+export const rateLimiter = 
+    async (req: Request, res: Response, next: NextFunction) => {
         try {
             const ip = req.ip || "unknown"
             const key = `ip:${ip}`
-            const currentTime = Date.now()
 
-            const result = await RedisClient.hgetall(key)
+            const result = await RedisClient.incr(key)
 
-            if(!result || Object.keys(result).length == 0) {
-                await RedisClient.hset(key, {
-                    firstAt: currentTime,
-                    count: 1
-                })
-
-                next()
+            if(result == 1) {
+                // first request
+                await RedisClient.expire(key, WINDOWN_SIZE)
             }
-            
-            const data: rateLimitDataType = rateLimitDataSchema.parse(result)
-
-            if( currentTime-data.firstAt > 15*60*1000 ) {
-                await RedisClient.hset(key, {
-                    firstAt: currentTime,
-                    count: 1
-                })
-
-                next()
-            }
-            
-            if(data.count >= 10) {
+            if(result > MAX_LIMIT) {
                 throw new ApiError(429, "Too many requests")
             }
 
-            await RedisClient.hset(key, {
-                count: data.count+1
-            })
             next()
-
         } catch(error) {
             next(error)
         }
     }
-}

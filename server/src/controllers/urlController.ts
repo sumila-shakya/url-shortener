@@ -1,8 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { reqSchema, shortCodeSchema, reqType, shortCodeType } from "../utils/validator";
-import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
-import { ZodError } from "zod";
 import { urlServices } from "../services/urlServices";
 import { analyticsEmitter } from "../events/analyticsEvents";
 import { hashData } from "../utils/hashIp";

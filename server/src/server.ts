@@ -15,6 +15,7 @@ const PORT = process.env.PORT || 3000
 
 //handle json data
 app.use(express.json())
+app.use(express.urlencoded({extended:true}))
 
 //url route
 app.use('',router)
@@ -32,8 +33,8 @@ const startServer = async ()=> {
         console.log("MySQL connected")
 
         // connect to redis
-        await RedisClient.connect()
-        console.log("Redis connected successfully")
+        //await RedisClient.connect()
+        //console.log("Redis connected successfully")
 
         app.listen(PORT,()=> {
             console.log(`The server is runnig in port ${PORT}`)
@@ -55,15 +56,15 @@ app.get('/api/health', async (req, res, next)=> {
         await db.execute('SELECT 1')
 
         //test database schema
-        await db.select().from(urls).limit(1)
-        await Analytics.countDocuments()
+        //await db.select().from(urls).limit(1)
+        //await Analytics.countDocuments()
 
         const healthData = {
-            status:"ok",
-            message: "server is running",
+            server:"UP",
             mysql: "Connected",
             redis: RedisClient.status === 'ready' ? "Connected": "Disconnected",
-            mongodb: mongodbStatus
+            mongodb: mongodbStatus,
+            timestamp: new Date()
         }
         
         res
