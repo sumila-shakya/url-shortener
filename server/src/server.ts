@@ -9,6 +9,7 @@ import { errorHandler } from './middleware/errorMiddleware';
 import mongoose from "mongoose";
 import router from './routes/urlRoutes';
 import { ApiResponse } from './utils/apiResponse';
+import './queue/worker';
 
 const app = express()
 const PORT = process.env.PORT || 3000

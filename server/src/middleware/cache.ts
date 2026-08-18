@@ -1,31 +1,35 @@
 import { Request, Response, NextFunction } from "express";
-import { ApiError } from "../utils/apiError";
 import { RedisClient } from "../config/redis.config";
-import { shortCodeSchema, shortCodeType } from "../utils/validator";
-import { analyticsEmitter } from "../events/analyticsEvents";
 import { hashData } from "../utils/hashIp";
 import { parseBrowser } from "../utils/userAgentParser";
+import { analyticsEvent } from "../services/loggerServices";
+import { analyticslogQueue } from "../queue/queue";
 
 export const cacheCode = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const shortCode: shortCodeType = shortCodeSchema.parse(req.params.shortCode)
+        const shortCode = req.params.shortCode as string
             
         const longUrl = await RedisClient.get(shortCode)
 
         if(longUrl) {
-            //asynchronous logging
-            analyticsEmitter.emit('url_clicked', {
+            console.log("redis cached")
+
+            //default 302 http status code
+            res.redirect(longUrl)
+
+            const logData: analyticsEvent = {
                 short_code: shortCode,
                 timestamp: new Date(),
                 ip_address: hashData(req.ip || 'unknown'),
                 user_agent: req.headers['user-agent'],
                 browser: parseBrowser(req.headers['user-agent'])
+            }
+            
+            await analyticslogQueue.add('log-click', logData, {
+                attempts: 5,
+                backoff: { type:'exponential', delay: 1000},
+                removeOnComplete: true
             })
-
-            console.log(longUrl)
-
-            //default 302 http status code
-            return res.redirect(longUrl)
         } else {
             next()
         }

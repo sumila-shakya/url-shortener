@@ -1,17 +1,16 @@
 info:
-  name: create_short_url
+  name: shorten_url
   type: http
   seq: 1
 
 http:
-  method: GET
+  method: POST
   url: http://localhost:3000/api/urls
   body:
     type: json
     data: |-
       {
-        "longUrl": "https://medium.com/@erickzanetti/redis-and-node-js-with-typescript-a-complete-guide-2bac6e300497",
-        "slug": "myurl"
+        "longUrl": "https://medium.com/@erickzanetti/redis-and-node-js-with-typescript-a-complete-guide-2bac6e300497"
       }
   auth: inherit
 

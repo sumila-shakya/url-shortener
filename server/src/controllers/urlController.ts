@@ -5,6 +5,8 @@ import { urlServices } from "../services/urlServices";
 import { analyticsEmitter } from "../events/analyticsEvents";
 import { hashData } from "../utils/hashIp";
 import { parseBrowser } from "../utils/userAgentParser";
+import { analyticsEvent } from "../services/loggerServices";
+import { analyticslogQueue } from "../queue/queue";
 
 export const urlControllers = {
     async createUrl(req: Request, res: Response, next: NextFunction) {
@@ -32,16 +34,31 @@ export const urlControllers = {
             const linkData = await urlServices.getLongUrl(shortCode)
             
             //asynchronous logging
+            /*
             analyticsEmitter.emit('url_clicked', {
                 short_code: shortCode,
                 timestamp: new Date(),
                 ip_address: hashData(req.ip || 'unknown'),
                 user_agent: req.headers['user-agent'],
                 browser: parseBrowser(req.headers['user-agent'])
-            })
+            })*/
 
             //default 302 http status code
-            return res.redirect(linkData.longUrl)
+            res.redirect(linkData.longUrl)
+
+            const logData: analyticsEvent = {
+                short_code: shortCode,
+                timestamp: new Date(),
+                ip_address: hashData(req.ip || 'unknown'),
+                user_agent: req.headers['user-agent'],
+                browser: parseBrowser(req.headers['user-agent'])
+            }
+
+            await analyticslogQueue.add('log-click', logData, {
+                attempts: 5,
+                backoff: { type:'exponential', delay: 1000},
+                removeOnComplete: true
+            })
 
         }catch(error) {
             next(error)
