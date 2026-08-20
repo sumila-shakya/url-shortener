@@ -1,15 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/apiError";
 import { RedisClient } from "../config/redis.config";
-import { MAX_LIMIT, WINDOWN_SIZE } from "../utils/constants";
-
-const lua =  `
-        local current = redis.call('INCR', KEYS[1])
-        if current == 1 then
-            redis.call('EXPIRE', KEYS[1], ARGV[1])
-        end
-        return current
-    `
+import { MAX_LIMIT, WINDOWN_SIZE, lua } from "../utils/constants";
 
 export const rateLimiter = 
     async (req: Request, res: Response, next: NextFunction) => {

@@ -19,6 +19,10 @@ app.use('',router)
 //database connection check
 app.get('/api/health', async (req, res, next)=> {
     try {
+        
+        //simulating the error to test the global error middleware
+        throw new Error("Simulated Crash")
+        
         //test database conection
         const mongodbStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected";
         await db.execute('SELECT 1')
