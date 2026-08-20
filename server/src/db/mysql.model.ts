@@ -9,3 +9,4 @@ export const urls = mysqlTable("urls", {
 })
 
 export type Url = typeof urls.$inferSelect
+export type NewUrl = typeof urls.$inferInsert

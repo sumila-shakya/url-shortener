@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { urlControllers } from "../controllers/urlController";
-import { rateLimiter } from "../middleware/rateLimiter";
-import { cacheCode } from "../middleware/cache";
+import { urlControllers } from "../controllers/url.controller";
+import { rateLimiter } from "../middleware/rateLimiter.middleware";
+import { cacheCode } from "../middleware/cache.middleware";
 
 const router = Router()
 

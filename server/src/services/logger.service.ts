@@ -1,12 +1,5 @@
-import { Analytics } from "../db/mongodbSchema";
-
-export interface analyticsEvent {
-    short_code: string,
-    timestamp: Date,
-    ip_address?: string,
-    user_agent?: string,
-    browser: string 
-}
+import { Analytics } from "../db/mongodb.model";
+import { analyticsEvent } from "../@types/interface";
 
 //log into the MongoDb database
 export const logAnalytics = async(log_info:analyticsEvent): Promise<void>=> {

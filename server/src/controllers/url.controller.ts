@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { reqSchema, shortCodeSchema, reqType, shortCodeType } from "../utils/validator";
 import { ApiResponse } from "../utils/apiResponse";
-import { urlServices } from "../services/urlServices";
-import { analyticsEmitter } from "../events/analyticsEvents";
+import { urlServices } from "../services/url.service";
 import { hashData } from "../utils/hashIp";
 import { parseBrowser } from "../utils/userAgentParser";
-import { analyticsEvent } from "../services/loggerServices";
+import { analyticsEvent } from "../@types/interface";
 import { analyticslogQueue } from "../queue/queue";
 
 export const urlControllers = {
@@ -18,7 +17,8 @@ export const urlControllers = {
             const data = await urlServices.createShortUrl(validatedData)
 
             //response 201 created
-            return res.status(201)
+            return res
+            .status(201)
             .json(new ApiResponse(201, data, "Url shortened successfully"))
         } catch(error) {
             next(error)
@@ -32,16 +32,6 @@ export const urlControllers = {
 
             //get long url
             const linkData = await urlServices.getLongUrl(shortCode)
-            
-            //asynchronous logging
-            /*
-            analyticsEmitter.emit('url_clicked', {
-                short_code: shortCode,
-                timestamp: new Date(),
-                ip_address: hashData(req.ip || 'unknown'),
-                user_agent: req.headers['user-agent'],
-                browser: parseBrowser(req.headers['user-agent'])
-            })*/
 
             //default 302 http status code
             res.redirect(linkData.longUrl)
@@ -54,6 +44,7 @@ export const urlControllers = {
                 browser: parseBrowser(req.headers['user-agent'])
             }
 
+            // send the logData to the queue for writing in background
             await analyticslogQueue.add('log-click', logData, {
                 attempts: 5,
                 backoff: { type:'exponential', delay: 1000},

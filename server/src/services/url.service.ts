@@ -1,12 +1,11 @@
-import { db } from "../config/mysql";
-import { urls, Url } from "../db/mysqlSchema";
-import { Analytics } from "../db/mongodbSchema";
+import { db } from "../config/mysql.config";
+import { urls, Url, NewUrl } from "../db/mysql.model";
+import { Analytics } from "../db/mongodb.model";
 import { eq } from "drizzle-orm";
 import { generateShortCode } from "../utils/shortCode";
 import { shortCodeType, reqType } from "../utils/validator";
 import { ApiError } from "../utils/apiError";
 import { RedisClient } from "../config/redis.config";
-
 
 export const urlServices = {
     async createShortUrl(reqData: reqType) {
@@ -19,7 +18,8 @@ export const urlServices = {
                 shortCode = generateShortCode()
 
                 //database lookup for existing short_code
-                const existing = await db.select()
+                const existing: Url[] = await db
+                .select()
                 .from(urls)
                 .where(eq(urls.shortCode, shortCode))
                 .limit(1)
@@ -34,36 +34,43 @@ export const urlServices = {
             }
         }
         else {
-            const existing = await db.select()
-                .from(urls)
-                .where(eq(urls.shortCode, slug))
-                .limit(1)
+            const existing: Url[] = await db
+            .select()
+            .from(urls)
+            .where(eq(urls.shortCode, slug))
+            .limit(1)
             
             if(existing.length > 0) {
                 throw new ApiError(409, "Slug already taken")
             }
         }
-        //insert short code, long url mapping to database
-        const [result] = await db.insert(urls).values({
+
+        const newUrl: NewUrl = {
             shortCode,
             longUrl,
             clicks: 0
-        })
+        }
 
-        const [newUrl] = await db.select()
+        //insert short code, long url mapping to database
+        const [result] = await db
+        .insert(urls)
+        .values(newUrl)
+
+        const [insertedUrl] = await db
+        .select()
         .from(urls)
-        .where(eq(urls.id,result.insertId))
+        .where(eq(urls.id, result.insertId))
 
         //build url
         const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`
-        const shortUrl = `${baseUrl}/${newUrl.shortCode}`
+        const shortUrl = `${baseUrl}/${insertedUrl.shortCode}`
         
         const data = {
-            id: newUrl.id,
+            id: insertedUrl.id,
             shortUrl: shortUrl,
-            longUrl: newUrl.longUrl,
-            createdAt: newUrl.createdAt,
-            clicks: newUrl.clicks,
+            longUrl: insertedUrl.longUrl,
+            createdAt: insertedUrl.createdAt,
+            clicks: insertedUrl.clicks,
         }
         
         return data
@@ -72,7 +79,8 @@ export const urlServices = {
 
     async getLongUrl(shortCode: shortCodeType): Promise<Url> {
         //get the long url
-        const [linkData] = await db.select()
+        const [linkData]: Url[] = await db
+        .select()
         .from(urls)
         .where(eq(urls.shortCode,shortCode))
         .limit(1)
@@ -89,7 +97,7 @@ export const urlServices = {
 
     async getAnalytics(shortCode: shortCodeType) {
         //get link data
-        const linkData = await this.getLongUrl(shortCode)
+        const linkData: Url = await this.getLongUrl(shortCode)
 
         //mongodb aggregation pipeline
         const [uniqueUser, clicksByDay, browserDistribution] = await Promise.all([

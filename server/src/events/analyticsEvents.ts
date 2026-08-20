@@ -1,7 +1,8 @@
 import { EventEmitter } from "events";
-import { logAnalytics, analyticsEvent } from "../services/loggerServices";
-import { db } from "../config/mysql";
-import { urls } from "../db/mysqlSchema";
+import { logAnalytics } from "../services/logger.service";
+import { analyticsEvent } from "../@types/interface";
+import { db } from "../config/mysql.config";
+import { urls } from "../db/mysql.model";
 import { sql, eq } from "drizzle-orm";
 
 export const analyticsEmitter = new EventEmitter()

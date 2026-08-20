@@ -1,4 +1,4 @@
-const BASE62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+import { BASE62 } from "./constants"
 
 export const generateShortCode = (): string => {
     const min = 62**6

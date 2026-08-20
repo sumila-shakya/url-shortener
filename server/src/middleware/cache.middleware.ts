@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { RedisClient } from "../config/redis.config";
 import { hashData } from "../utils/hashIp";
 import { parseBrowser } from "../utils/userAgentParser";
-import { analyticsEvent } from "../services/loggerServices";
+import { analyticsEvent } from "../@types/interface";
 import { analyticslogQueue } from "../queue/queue";
 
 export const cacheCode = async (req: Request, res: Response, next: NextFunction) => {
@@ -25,6 +25,7 @@ export const cacheCode = async (req: Request, res: Response, next: NextFunction)
                 browser: parseBrowser(req.headers['user-agent'])
             }
             
+            // send the log data to the queue for porcessing in the background
             await analyticslogQueue.add('log-click', logData, {
                 attempts: 5,
                 backoff: { type:'exponential', delay: 1000},

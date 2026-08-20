@@ -1,12 +1,5 @@
-import mongoose, {Document} from "mongoose";
-
-export interface IAnalytics extends Document {
-    short_code: string,
-    timestamp: Date,
-    ip_address?: string,
-    user_agent?: string,
-    browser: string 
-}
+import mongoose from "mongoose";
+import { IAnalytics } from "../@types/interface";
 
 const analyticsSchema = new mongoose.Schema({
     short_code: {
