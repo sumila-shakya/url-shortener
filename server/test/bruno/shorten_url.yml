@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: http://localhost:3000/api/urls
+  url: http://localhost:3001/api/urls
   body:
     type: json
     data: |-

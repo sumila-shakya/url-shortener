@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: http://localhost:3000/api/urls/gUKzXnb/stats
+  url: http://localhost:3001/api/urls/gUKzXnb/stats
   auth: inherit
 
 settings:
