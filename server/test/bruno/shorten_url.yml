@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-        "longUrl": "https://medium.com/@erickzanetti/redis-and-node-js-with-typescript-a-complete-guide-2bac6e300497"
+        "longUrl": "https://medium.com/@fernando.harsha2016/demystifying-docker-bridge-networks-how-containers-talk-to-each-other-a35f5c327efd"
       }
   auth: inherit
 
@@ -19,3 +19,4 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true
