@@ -19,7 +19,7 @@ COPY . .
 RUN npm run build
 
 # production stage
-FROM node:${NODE_VERSION}-alpine AS production
+FROM node:${NODE_VERSION}-alpine AS prod
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package*.json ./

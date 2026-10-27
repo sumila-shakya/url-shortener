@@ -49,7 +49,7 @@ Before running this project, ensure you have:
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/sumila-shakya/url-shortener.git
-cd url-shortener
+cd url-shortener/server
 ```
 
 ### 2. Install Dependencies
@@ -108,25 +108,25 @@ cp .env.example .env
 Edit `.env` with your configuration:
 ```env
 # Server
-PORT=3000
-BASE_URL=http://localhost:3000
+# Server
+PORT="3001"
+BASE_URL="http://localhost:3001"
 
 # MySQL
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=password
-DB_NAME=url_shortener
+DB_HOST="localhost"
+DB_USER="root"
+DB_PASSWORD="password"
+DB_NAME="url_shortener_db"
 
 # MongoDB
-MONGODB_URL=mongodb://localhost:27017/url_shortener
+MONGODB_URL="mongodb://localhost:27017/url_shortener"
 
 # Redis
-REDIS_URL=redis://localhost:6379
+REDIS_URL="redis://localhost:6379"
 ```
 
 ### 7. Run Database Migrations
 ```bash
-cd server
 npm run db:generate
 npm run db:push
 ```
@@ -138,7 +138,7 @@ This creates the `urls` table in MySQL with proper indexes.
 npm run dev
 ```
 
-Server will start at `http://localhost:3000`. This starts both the API server and the BullMQ worker (analytics jobs are processed in the same process).
+Server will start at `http://localhost:3001`. This starts both the API server and the BullMQ worker (analytics jobs are processed in the same process).
 
 ## 📚 API Documentation
 
@@ -193,7 +193,7 @@ Errors are caught by a global error-handling middleware, ensuring every failure 
   "message": "Url shortened successfully",
   "data": {
     "id": 6,
-    "shortUrl": "http://localhost:3000/dbshwMN",
+    "shortUrl": "http://localhost:3001/dbshwMN",
     "longUrl": "https://medium.com/@erickzanetti/redis-and-node-js-with-typescript-a-complete-guide-2bac6e300497",
     "createdAt": "2026-08-20T08:35:12.000Z",
     "clicks": 0
@@ -310,48 +310,52 @@ MongoDB analytics write + IP hash + browser parse
 ```
 url_shortener/
 ├── server/
-│ ├── drizzle/ # Database migrations
+│ ├── drizzle/                                # Database migrations
 │ ├── src/
 │ │ ├── @types/
-│ │ │ └── interface.ts
-│ │ ├── config/ # Database & Redis connections
+│ │ │ └── interface.ts                        # Typescript interfaces
+│ │ ├── config/                               # Database & Redis connections
 │ │ │ ├── mysql.config.ts
 │ │ │ ├── env.config.ts
 │ │ │ ├── mongodb.config.ts
 │ │ │ └── redis.config.ts
-│ │ ├── controllers/ # Request handlers
+│ │ ├── controllers/                          # Request handlers
 │ │ │ └── url.controller.ts
-│ │ ├── services/ # Business logic
+│ │ ├── services/                             # Business logic
 │ │ │ ├── url.service.ts
 │ │ │ └── logger.service.ts
-│ │ ├── db/ # Database schemas
+│ │ ├── db/                                   # Database schemas
 │ │ │ ├── mysql.model.ts
 │ │ │ └── mongodb.model.ts
-│ │ ├── routes/ # API routes
+│ │ ├── routes/                               # API routes
 │ │ │ └── url.route.ts
-│ │ ├── middleware/ # Express middleware
+│ │ ├── middleware/                           # Express middleware
 │ │ │ ├── error.middleware.ts
 │ │ │ ├── rateLimiter.middleware.ts
 │ │ │ └── cache.middleware.ts
-│ │ ├── queues/ # BullMQ queue definitions
+│ │ ├── queues/                               # BullMQ queue definitions
 │ │ │ ├── queue.ts
 │ │ │ └── worker.ts
-│ │ ├── utils/ # Helper functions
-│ │ │ ├── shortcode.ts
+│ │ ├── utils/                                # Helper functions
+│ │ │ ├── shortCode.ts
 │ │ │ ├── constants.ts
 │ │ │ ├── hashIp.ts
 │ │ │ ├── userAgentParser.ts
 │ │ │ ├── apiResponse.ts
 │ │ │ ├── apiError.ts
 │ │ │ └── validator.ts
-│ │ ├── app.ts
-│ │ └── server.ts # Application entry point
-│ ├── .env.example # Environment template
+│ │ ├── app.ts                                # Express app setup, global middlewares, route mounting
+│ │ └── server.ts                             # Application entry point
+│ ├── test/
+│ ├── Dockerfile
+│ ├── .dockerignore
+│ ├── .env.example                            # Environment template
 │ ├── package.json
 │ ├── package-lock.json
 │ ├── tsconfig.json
 │ └── drizzle.config.js
 ├── .gitignore
+├── compose.yaml
 └── README.md
 ```
 
@@ -413,8 +417,8 @@ npm run db:push      # Apply migrations to database
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| PORT | Server port | 3000 | No |
-| BASE_URL | Base URL for short links | http://localhost:3000 | Yes |
+| PORT | Server port | 3001 | No |
+| BASE_URL | Base URL for short links | http://localhost:3001 | Yes |
 | DB_HOST | MySQL host | localhost | Yes |
 | DB_USER | MySQL username | root | Yes |
 | DB_PASSWORD | MySQL password | - | Yes |
